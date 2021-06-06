@@ -1,10 +1,11 @@
-# Course: 
-# Author: 
-# Assignment: 
-# Description:
+# Course: CS 261
+# Author: Nicholas Bowden
+# Assignment: 6 - graphs/DFS/BFS/Dijkstra
+# Description: Undirected graph methods implemented: add_vertex(), add_edge()remove_edge(), 
+#   remove_vertex()get_vertices(), get_edges()is_valid_path(), dfs(), ​bfs()count_connected_components(), has_cycle()
+#   Each method has a detailed doc string as well as examples in the included pdf.
 
 from collections import deque
-import heapq as heap
 
 class UndirectedGraph:
     """
@@ -44,7 +45,8 @@ class UndirectedGraph:
 
     def add_vertex(self, v: str) -> None:
         """
-        Add new vertex to the graph
+        Add new vertex to the graph. Does nothing if the vertex passed is already in the dictionary. 
+        Initializes an empty list to store adjacent vertices.
         """
         if v in self.adj_list:
             return
@@ -52,15 +54,22 @@ class UndirectedGraph:
         
     def add_edge(self, u: str, v: str) -> None:
         """
-        Add edge to the graph
+        Add edge to the graph. If either vertex is not already in the adjacency dictionary, it adds it to the dictionary.
+        Adds each vertex to the others list.
+        Does not allow duplicates to be added on any list.
+        Does nothing if that same vertex is passed for both parameters.
         """
+        # Same vertex passed
         if u == v:
             return
+        
+        # Adds a new vertex to adj_list if not in the dictionary
         if u not in self.adj_list:
             self.add_vertex(u)
         if v not in self.adj_list:
             self.add_vertex(v)
 
+        # Adds opposite vertex to each list if not already present
         if u not in self.adj_list[v]:
             self.adj_list[v].append(u)
         if v not in self.adj_list[u]:
@@ -69,43 +78,52 @@ class UndirectedGraph:
 
     def remove_edge(self, v: str, u: str) -> None:
         """
-        Remove edge from the graph
+        Remove edge from the graph. Checks if passed vertices are in the dictionary and then checks if the opposite 
+        vertex is present in each vertices adjacency list and removes each occurrence if found.
+        Does nothing if the same vertex is passed for both parameters.
         """
+        # Same vertex passed
         if u == v:
             return
-
+        
+        # Checks if passed vertex is in the dictionary
         if u in self.adj_list:
+            # Removes if found on opposite vertices list
             if v in self.adj_list[u]:
                 self.adj_list[u].remove(v)
+        
+        # Same for the other vertex
         if v in self.adj_list:
             if u in self.adj_list[v]:
                 self.adj_list[v].remove(u)
 
     def remove_vertex(self, v: str) -> None:
         """
-        Remove vertex and all connected edges
+        Remove vertex and all connected edges. Pops the vertex off the dictionary, uses the list that was popped 
+        to find all the adjacent vertices and remove the occurrence of the removed vertex
         """
         if v in self.adj_list:
             edges = self.adj_list.pop(v)
+
             for edge in edges:
                 self.adj_list[edge].remove(v)
 
-        
 
     def get_vertices(self) -> []:
         """
-        Return list of vertices in the graph (any order)
+        Return list of vertices in the graph (any order).
         """
         return [*self.adj_list]
 
     def get_edges(self) -> []:
         """
-        Return list of edges in the graph (any order)
+        Return list of edges in the graph (any order). Appends all the non repeating vertex,edge combos.
+        
         """
         result = []
         for vertex in self.adj_list:
             for edge in self.adj_list[vertex]:
-                if (edge,vertex) not in result:
+                if (edge,vertex) not in result:  # prevents duplicates caused by nested loop
                     result.append((vertex, edge))
      
         return result
@@ -117,11 +135,17 @@ class UndirectedGraph:
         """
         result = True
         path_size = len(path)
+        
+        # Empty path
         if path_size == 0:
             return result
+
+        # Single value, verifies that it's valid
         if path_size == 1:
             if path[0] not in self.adj_list:
                 result = False
+
+        # Traverses through verifying that each step and the next are possible
         for i in range(path_size-1):
             if path[i] not in self.adj_list:
                 return False
@@ -132,83 +156,103 @@ class UndirectedGraph:
 
     def dfs(self, v_start, v_end=None) -> []:
         """
-        Return list of vertices visited during DFS search
-        Vertices are picked in alphabetical order
+        Return list of vertices visited during this recursive DFS search. Vertices are picked in alphabetical order.
+        Can be used to find a specific node by using v_end, or find all connected nodes without.
+        Starts at the passed node and saves it as visited, then takes the adjacency list and sorts.
+        Iterating through that list, if v_end is found then it is added to visited and the 
+        function stops. If v_end is not found or not present, the function continues looking for adjacent
+        nodes that have not been visited yet. Once it has visited them all it returns the result.
         """
         result = []
-        if v_start not in self.adj_list:
+
+        if v_start not in self.get_vertices():
             return result
 
-        next_vertex = []
-        next_vertex.append(v_start)
-        vertex = v_start
-
-        while len(next_vertex) != 0:
-                
-            edges = self.adj_list[vertex]
-
-            if vertex not in result:
-                result.append(vertex)
-
-            if vertex == v_end:
-                return result
-
-            edges.sort()
-            old_vertex = vertex
-            for edge in edges:
-                if edge not in result:
-                    next_vertex.append(vertex)
-                    vertex = edge
-                    break
-            if vertex == old_vertex:
-                vertex = next_vertex.pop()
-   
+        def rec_dfs(result, v, v_end=None):
             
+            if v_end:
+                if v_end not in result: # Runs until v_end is visited
+                    result.append(v) 
+            elif v_end is None:  # Runs until all adjacent nodes are visited
+                result.append(v)
+    
+            # Test cases require ascending lexicographical order
+            self.adj_list[v].sort()
+
+            # Loops through each adjacent vertex, recurring for each
+            for adj in self.adj_list[v]:
+                if v_end and v_end in result:
+                    break
+                elif adj not in result:
+                    rec_dfs(result, adj, v_end)
+                
+        rec_dfs(result, v_start, v_end)
+      
         return result
 
     def bfs(self, v_start, v_end=None) -> []:
         """
-        Return list of vertices visited during BFS search
-        Vertices are picked in alphabetical order
+        Return list of vertices visited during BFS search.  
+        Uses a queue to keep track of unvisited vertices, runs until the queue is empty, indicating 
+        every connected node has been visited. 
+        Can be used to search from node to node with the presence of v_end or to find all connected nodes without.
+        Takes the vertex at the front of the queue and gets it's adjacent vertex list. This method then
+        adds the vertex to the result list if its not a duplicate.
+        Sorts the edges in alphabetical order, adds each vertex to the queue if it's not a duplicate.
+        Ends when v_end is added to the result list or when the queue is empty indicating that all of the connected
+        nodes have been visited.
         """
         result = []
+        
+        # Invalid starting node
         if v_start not in self.adj_list:
             return result
 
         next_vertex = deque()
         next_vertex.append(v_start) 
 
+        # Runs until v_end is found or queue is empty
         while len(next_vertex) != 0:
-            vertex = next_vertex.popleft()
+            vertex = next_vertex.popleft()  # dequeue 
             edges = self.adj_list[vertex]
 
-            if vertex not in result:
+            # Marks as visitied
+            if vertex not in result:  
                 result.append(vertex)
 
-            if vertex == v_end:
+            # Ends loop
+            if vertex == v_end:  
                 return result 
 
-            edges.sort()
+            edges.sort()  # Alphabetical order
             for item in edges:
                 if item not in result:
-                    next_vertex.append(item)
+                    next_vertex.append(item)  # enqueue if not duplicate
             
         return result        
 
     def count_connected_components(self):
         """
-        Return number of connected componets in the graph
+        Return the number of connected componets in the graph.
+        Gets a list of current vertices. Starts with the first vertex in the list and runs a dfs on it.
+        The connected vertices are returned from that method then each of those connections are removed from
+        the vertices list, leaving any unconnected nodes in the list. Increments the count for each removal of 
+        an empty node or connected set found through dfs.
         """
         count = 0
         vertices = self.get_vertices()
       
-        
+        # Runs until vertices is empty
         while len(vertices) > 0:
             vertex = vertices[0]
+            
+            # Empty list, increment count
             if len(self.adj_list[vertex]) == 0:
                 count += 1
                 vertices.remove(vertex)
                 continue
+
+            # Remove nodes returned from dfs, increment count
             connection = self.dfs(vertex)
             for component in connection:
                 vertices.remove(component)
@@ -216,66 +260,55 @@ class UndirectedGraph:
 
         return count
 
-
     def has_cycle(self):
         """
-        Return True if graph contains a cycle, False otherwise
+        Return True if graph contains a cycle, False otherwise.
+        Creates a visited dictionary with a initial False value for each vertex.
+        Loops through each one of the vertices, looking for unvisited nodes.
+        If a node with an empty list is found, it's skipped over. 
+        If a node has already been visited when encountered, it's skipped.
+        Otherwise, using dfs, it recursively checks for cycles by saving
+        the parent of the current node. When adjacent vertices are checked, if a vertex has 
+        already been visited and it is NOT the current parent node, then a cycle has been found.
         """
+        vertices = self.get_vertices()
+        visited = {vert: False for vert in vertices}
         cycle = False
 
-        def cycle_dfs(v_start):
-            result = []
-            cycle = False
-            backtrack = False
-            if v_start not in self.adj_list:
-                return cycle, result
+        def rec_dfs(visited, parent, v):
+            # Mark current node as visited
+            visited[v] = True
 
-            next_vertex = []
-            next_vertex.append(v_start)
-            vertex = v_start
+            # Adjacent vertices
+            for adj in self.adj_list[v]:
+        
+                # if adj node hasn't been visited yet
+                if not visited[adj]:
+                    if rec_dfs(visited, v, adj): # Recur to check cycle
+                        return True 
+        
+                # adj node has been visited AND is not the parent
+                elif adj != parent:
+                    return True # Back edge
+        
+            # No back edge
+            return False     
 
-            while len(next_vertex) != 0:
-                edges = self.adj_list[vertex]
-
-                if vertex not in result:
-                    result.append(vertex)
-                else:
-                    if not backtrack:
-                        if vertex != result[-1] and vertex != result[-2]:
-                            cycle = True 
-
-                edges.sort()
-                old_vertex = vertex
-                for edge in edges:
-                    if edge not in result:
-                        next_vertex.append(vertex)
-                        vertex = edge
-                        backtrack = False
-                        break
-                if vertex == old_vertex:
-                    vertex = next_vertex.pop()
-                    backtrack = True
-    
-                
-            return cycle, result       
-
-        vertices = self.get_vertices()
-      
-        while len(vertices) > 0:
-            vertex = vertices[0]
+        for vertex in vertices:
+            # Skips empty lists
             if len(self.adj_list[vertex]) == 0:
-                vertices.remove(vertex)
                 continue
-            cycle_result = cycle_dfs(vertex)
-            contains, connection = cycle_result
-            if contains:
+            
+            # Skips visited nodes, looking for unvisited chains
+            if visited[vertex]:
+                continue
+
+            # Returns True if cycle is found, continues otherwise
+            if rec_dfs(visited, None, vertex):
                 cycle = True
+                break 
 
-            for component in connection:
-                vertices.remove(component)
-
-        return cycle
-
+        return cycle    
 
 if __name__ == '__main__':
 
