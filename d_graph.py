@@ -315,7 +315,7 @@ class DirectedGraph:
         vertices = self.get_vertices()
         visited = {vert: float('inf') for vert in vertices}
 
-        # Initialize priority queue and methods from heapq boilerplate
+        # Initialize priority queue and boilerplate methods from heapq documentation
         pq = []  # heap
         def add_task(task, priority=0):
             """Add a new task or update the priority of an existing task"""

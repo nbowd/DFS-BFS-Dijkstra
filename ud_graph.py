@@ -113,7 +113,6 @@ class UndirectedGraph:
             for edge in edges:
                 self.adj_list[edge].remove(v)
 
-
     def get_vertices(self) -> []:
         """
         Return list of vertices in the graph (any order).
@@ -129,7 +128,7 @@ class UndirectedGraph:
         for vertex in self.adj_list:
             for edge in self.adj_list[vertex]:
 
-                if (edge,vertex) not in result:  # prevents duplicates caused by nested loop
+                if (edge,vertex) not in result:  # prevents 'duplicates' 
                     result.append((vertex, edge))
      
         return result
@@ -157,7 +156,7 @@ class UndirectedGraph:
         for i in range(path_size-1):
             if path[i] not in self.adj_list:  # Current node not in list
                 return False
-            if path[i+1] not in self.adj_list[path[i]]:  # Next node node adjacent to current node
+            if path[i+1] not in self.adj_list[path[i]]:  # Next node not adjacent to current node
                 result = False
 
         return result
@@ -223,7 +222,7 @@ class UndirectedGraph:
         if v_start not in self.adj_list:
             return visited
 
-        next_vertex = deque()
+        next_vertex = deque()  # imported structure
         next_vertex.append(v_start) 
 
         # Runs until v_end is found or queue is empty
