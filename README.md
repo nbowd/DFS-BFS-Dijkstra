@@ -1,7 +1,7 @@
 # DFS-BFS-Dijkstra
 DFS/BFS/Dijkstra's Search Algorithms for undirected and directed graphs in Python
 
-This is the Portfolio Projcet for CS 261 Data Structures at Oregon State University.
+This is the Portfolio Project for CS 261 Data Structures at Oregon State University.
 
 For an undirected graph there are methods to search use depth first search, breadth first search, as well as a method to detect cycles.
 These methods are done using an adjacency list to represet the graph. Each vertex has a list of connected vertices.
