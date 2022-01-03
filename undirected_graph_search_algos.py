@@ -1,9 +1,6 @@
-# Course: CS 261
 # Author: Nicholas Bowden
-# Assignment: 6 - graphs/DFS/BFS/Dijkstra
 # Description: Undirected graph methods implemented: add_vertex(), add_edge()remove_edge(), 
 #   remove_vertex()get_vertices(), get_edges()is_valid_path(), dfs(), ​bfs()count_connected_components(), has_cycle()
-#   Each method has a detailed doc string as well as examples in the included pdf.
 
 from collections import deque
 

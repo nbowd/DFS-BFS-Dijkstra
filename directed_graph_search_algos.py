@@ -1,6 +1,4 @@
-# Course: CS261 - Data Structures
 # Author: Nicholas Bowden
-# Assignment: 6 - Directed Graphs/Dijkstra's
 # Description: Contains DFS/BFS/Dijkstra's search methods for Directed Graph as well as: add_vertex(), add_edge()remove_edge(), get_vertices(), 
 #  get_edges()is_valid_path(), dfs(), ​bfs()has_cycle(), dijkstra(). More can be found on the docstring of each method and examples can be found in the included pdf.
 
